@@ -44,6 +44,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+
 @Composable
 fun NavigationExample() {
     val navController = rememberNavController()
@@ -94,6 +96,12 @@ fun Screen1(navController: NavController) {
             )
         }
     }}
+
+
+
+
+
+
     }
 
 
