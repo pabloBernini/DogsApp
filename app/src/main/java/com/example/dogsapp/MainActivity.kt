@@ -117,16 +117,25 @@ fun Screen1(navController: NavController) {
 
  ///////////////////    S E A R C H    B A R    ////////////////
 
-    var text by remember {mutableStateOf("")}
+        var searchQuery by remember { mutableStateOf("") }
+        val filteredList = remember(searchQuery, names) {
+            val trimmedQuery = searchQuery.trim().lowercase()
+            if (trimmedQuery.isBlank()) names
+            else names.filter {
+                it.name.lowercase().contains(trimmedQuery) ||
+                it.breed.lowercase().contains(trimmedQuery)
 
+            }
+
+        }
     Row(modifier = Modifier
         .padding(10.dp)
         .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween) {
         OutlinedTextField(
-            value = text,
-            onValueChange = {text = it},
+            value = searchQuery,
+            onValueChange = {searchQuery = it},
             placeholder = {Text("Search for doggos")},
             colors = TextFieldDefaults.colors(
                 focusedContainerColor  = Color.Transparent,
@@ -147,19 +156,18 @@ fun Screen1(navController: NavController) {
     }
 
 //////////////////////// L I S T /////////////////////////////
-
         LazyColumn(modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)) {
-            items(names.size) { dog ->
+            items(filteredList.size) { dog ->
 
                 // list item //
             Row(modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
 
-                Text(text = names[dog].name)
-                Text(text = names[dog].breed)
+                Text(text = filteredList[dog].name)
+                Text(text = filteredList[dog].breed)
 
                 IconButton(onClick = {
                     names.removeAt(dog)
