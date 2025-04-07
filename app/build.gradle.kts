@@ -64,4 +64,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx.v270)
     implementation(libs.androidx.activity.compose.v182)
     implementation(libs.androidx.compose.bom.v20230800)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.coil.compose)
+    implementation(libs.kotlinx.coroutines.android)
 }

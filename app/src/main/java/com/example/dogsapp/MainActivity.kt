@@ -2,10 +2,13 @@ package com.example.dogsapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,21 +32,35 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import retrofit2.http.GET
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import coil.compose.rememberAsyncImagePainter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +74,41 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+///////////////////////////     API     ////////////////////////////
+
+
+data class DogApiResponse(
+    val message: String,
+    val status: String
+)
+
+
+interface DogApiService {
+    @GET("breeds/image/random")
+    suspend fun getRandomDogImage(): DogApiResponse
+}
+
+object RetrofitInstance {
+    private const val BASE_URL = "https://dog.ceo/api/"
+
+    private val retrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    val api: DogApiService by lazy {
+        retrofit.create(DogApiService::class.java)
+    }
+}
+
+
+
+
+
+
 
 val dog1 = Dog("Boxy", "German Shepard",false)
 val dog2 = Dog("Monty", "Retriever", false)
@@ -73,9 +125,22 @@ fun NavigationExample() {
         composable("screen2") { Screen2(navController) }
         composable("screen3") { Screen3(navController) }
         composable("screen4") { Screen4(navController) }
-
+        composable(
+            "screen5/{name}/{breed}",
+            arguments = listOf(
+                navArgument("name") { type = NavType.StringType },
+                navArgument("breed") { type = NavType.StringType },
+            )
+        ) { backStackEntry ->
+            val name = backStackEntry.arguments?.getString("name") ?: ""
+            val breed = backStackEntry.arguments?.getString("breed") ?: ""
+            Screen5(navController, name, breed)
+        }}
     }
-}
+
+
+
+
 
 @Composable
 fun Screen1(navController: NavController) {
@@ -175,11 +240,29 @@ fun Screen1(navController: NavController) {
             Row(modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
+                Image(
+                    painter = painterResource(id = R.drawable.doggo1),
+                    contentDescription = "Doggo Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(50.dp).aspectRatio(1f)
+
+
+                )
+                Column(modifier = Modifier
+                    .fillMaxWidth(0.75f)
+                    .clickable {
+                        navController.navigate("screen5/" +
+                                "${filteredList[index].name}/" +
+                                filteredList[index].breed
+                        )
+                    }){
 
                 Text(text = filteredList[index].name)
                 Text(text = filteredList[index].breed)
+                }
 
 
+                Row{
 
                 IconButton(onClick = {
                     filteredList[index].isPinned = !filteredList[index].isPinned
@@ -207,13 +290,10 @@ fun Screen1(navController: NavController) {
                         contentDescription = "delete"
                     )
                 }
+                }
             }
-
-
             }
         }
-
-
 
 
     } ///end of column
@@ -297,7 +377,23 @@ fun Screen3(navController: NavController) {
                 contentDescription = "back",
                 tint = Color.Transparent
             )
-        }}
+        }
+
+        Column(modifier = Modifier.padding(50.dp).fillMaxWidth(),
+            verticalArrangement = Arrangement.SpaceAround,
+            horizontalAlignment = Alignment.CenterHorizontally
+
+            ){
+
+        Image(
+            painter = painterResource(id = R.drawable.profilowe),
+            contentDescription = "Doggo Image",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.size(200.dp).aspectRatio(1f))
+
+        Text("Majk Wazowski")
+        }
+    }
 }
 
 
@@ -338,16 +434,67 @@ fun Screen4(navController: NavController) {
             )
         }
 
+
+
+
+        //////////////////  P H O T O ///////////////////////////
+
+
+        var imageUrl by remember { mutableStateOf<String?>(null) }
+        var isLoading by remember { mutableStateOf(true) } // Start loading immediately
+        var errorMessage by remember { mutableStateOf<String?>(null) }
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(Unit) { // Fetch image on first composition
+            coroutineScope.launch {
+                try {
+                    val response = withContext(Dispatchers.IO) {
+                        RetrofitInstance.api.getRandomDogImage()
+                    }
+                    imageUrl = response.message
+                } catch (e: Exception) {
+                    errorMessage = "Error loading image: ${e.message}"
+                } finally {
+                    isLoading = false
+                }
+            }
+        }
+
+        if (imageUrl != null) {
+            Image(
+                painter = rememberAsyncImagePainter(imageUrl),
+                contentDescription = "Random Dog Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f)
+                    .padding(16.dp)
+            )
+        } else if (isLoading) {
+            Text("Loading Dog Image...")
+        } else if (errorMessage != null) {
+            Text(errorMessage!!)
+        } else {
+            Text("Failed to load dog image.")
+        }
+
+
+
+
     /////////////// D O G    A D D I N G /////////
 
         var text by remember {mutableStateOf("")}
         var textSecond by remember {mutableStateOf("")}
 
-        Row(modifier = Modifier
+
+
+
+        Column(modifier = Modifier
             .padding(10.dp)
             .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween) {
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceAround
+            ) {
             OutlinedTextField(
                 value = text,
                 onValueChange = {text = it},
@@ -378,12 +525,60 @@ fun Screen4(navController: NavController) {
         Button(onClick = {
             val newDog = Dog(text, textSecond,false )
             names.add(newDog)
+            navController.navigate("screen1")
+
         }){
-            Text("Przycisk")
+            Text("Add")
         }
     }
 }}
 
+@Composable
+fun Screen5(navController: NavController, name: String, breed: String) {
+
+
+
+
+    /////////////////// N A V B A R /////////////////
+
+    Column (modifier = Modifier.fillMaxSize()){
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(Color.LightGray)
+                .padding(10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(
+                onClick = { navController.navigate("screen1") }
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "back",
+                )
+            }
+
+
+            Text("Details",
+                style = TextStyle(fontSize = 24.sp)
+            )
+
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "back",
+                tint = Color.Transparent
+            )
+        }
+
+
+
+            Text(name)
+             Text(breed)
+    }
+}
 
 
 
