@@ -17,6 +17,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -56,11 +58,12 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-val dog1 = Dog("Boxy", "German Shepard")
-val dog2 = Dog("Monty", "Retriever")
-val dog3 = Dog("Taj", "Boxer")
+val dog1 = Dog("Boxy", "German Shepard",false)
+val dog2 = Dog("Monty", "Retriever", false)
+val dog3 = Dog("Taj", "Boxer", false)
 
 val names = mutableStateListOf<Dog>(dog1, dog2, dog3)
+
 @Composable
 fun NavigationExample() {
     val navController = rememberNavController()
@@ -118,10 +121,13 @@ fun Screen1(navController: NavController) {
  ///////////////////    S E A R C H    B A R    ////////////////
 
         var searchQuery by remember { mutableStateOf("") }
-        val filteredList = remember(searchQuery, names) {
+        val sortedNames = names
+            .sortedWith(compareByDescending<Dog>{it.isPinned}
+                .thenBy{it.name})
+        val filteredList = remember(searchQuery, sortedNames, names) {
             val trimmedQuery = searchQuery.trim().lowercase()
-            if (trimmedQuery.isBlank()) names
-            else names.filter {
+            if (trimmedQuery.isBlank()) sortedNames
+            else sortedNames.filter {
                 it.name.lowercase().contains(trimmedQuery) ||
                 it.breed.lowercase().contains(trimmedQuery)
 
@@ -154,27 +160,51 @@ fun Screen1(navController: NavController) {
             )
         }
     }
+        Row {
+            Text("\uD83D\uDC36: ${names.size}")
+            Text("\uD83D\uDC97: ${names.count{it.isPinned}}")
+        }
 
 //////////////////////// L I S T /////////////////////////////
         LazyColumn(modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)) {
-            items(filteredList.size) { dog ->
+            items(filteredList.size) { index ->
 
                 // list item //
             Row(modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
 
-                Text(text = filteredList[dog].name)
-                Text(text = filteredList[dog].breed)
+                Text(text = filteredList[index].name)
+                Text(text = filteredList[index].breed)
+
+
 
                 IconButton(onClick = {
-                    names.removeAt(dog)
+                    filteredList[index].isPinned = !filteredList[index].isPinned
+                },modifier = Modifier.size(25.dp)) {
+                        if(filteredList[index].isPinned){
+                    Icon(
+                        imageVector = Icons.Filled.Favorite,
+                        contentDescription = "pin"
+                    )
+                        } else
+                            Icon(
+                                imageVector = Icons.Filled.FavoriteBorder,
+                                contentDescription = "pined"
+                            )
+                }
+
+
+
+
+                IconButton(onClick = {
+                names.remove(filteredList[index])
                 },modifier = Modifier.size(25.dp)) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
-                        contentDescription = "add"
+                        contentDescription = "delete"
                     )
                 }
             }
@@ -346,7 +376,7 @@ fun Screen4(navController: NavController) {
 
 
         Button(onClick = {
-            val newDog = Dog(text, textSecond)
+            val newDog = Dog(text, textSecond,false )
             names.add(newDog)
         }){
             Text("Przycisk")
