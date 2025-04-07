@@ -56,8 +56,11 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+val dog1 = Dog("Boxy", "German Shepard")
+val dog2 = Dog("Monty", "Retriever")
+val dog3 = Dog("Taj", "Boxer")
 
-val names = mutableStateListOf<String>("one", "two", "three")
+val names = mutableStateListOf<Dog>(dog1, dog2, dog3)
 @Composable
 fun NavigationExample() {
     val navController = rememberNavController()
@@ -148,17 +151,18 @@ fun Screen1(navController: NavController) {
         LazyColumn(modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp)) {
-            items(names.size) { name ->
+            items(names.size) { dog ->
 
                 // list item //
             Row(modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
 
-                Text(text = names[name])
+                Text(text = names[dog].name)
+                Text(text = names[dog].breed)
 
                 IconButton(onClick = {
-                    names.removeAt(name)
+                    names.removeAt(dog)
                 },modifier = Modifier.size(25.dp)) {
                     Icon(
                         imageVector = Icons.Filled.Delete,
@@ -334,7 +338,8 @@ fun Screen4(navController: NavController) {
 
 
         Button(onClick = {
-            names.add(text + " " + textSecond)
+            val newDog = Dog(text, textSecond)
+            names.add(newDog)
         }){
             Text("Przycisk")
         }
