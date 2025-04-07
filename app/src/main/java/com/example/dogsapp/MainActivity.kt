@@ -573,10 +573,15 @@ fun Screen5(navController: NavController, name: String, breed: String) {
             )
         }
 
-
+        Column(modifier = Modifier.padding(50.dp).fillMaxWidth(),
+            verticalArrangement = Arrangement.SpaceAround,
+            horizontalAlignment = Alignment.CenterHorizontally) {
 
             Text(name)
              Text(breed)
+
+        }
+
     }
 }
 
