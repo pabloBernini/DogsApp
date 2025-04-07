@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -133,7 +134,7 @@ fun Screen1(navController: NavController) {
                 .weight(1f)
         )
         IconButton(onClick = {
-            names.add("ok")
+            navController.navigate("screen4")
         },modifier = Modifier.size(50.dp)) {
             Icon(
                 imageVector = Icons.Filled.Add,
@@ -150,6 +151,9 @@ fun Screen1(navController: NavController) {
             items(names.size) { name ->
 
                 // list item //
+            Row(modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween) {
 
                 Text(text = names[name])
 
@@ -161,6 +165,7 @@ fun Screen1(navController: NavController) {
                         contentDescription = "add"
                     )
                 }
+            }
 
 
             }
@@ -293,8 +298,48 @@ fun Screen4(navController: NavController) {
 
     /////////////// D O G    A D D I N G /////////
 
+        var text by remember {mutableStateOf("")}
+        var textSecond by remember {mutableStateOf("")}
+
+        Row(modifier = Modifier
+            .padding(10.dp)
+            .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = {text = it},
+                placeholder = {Text("Dog's name")},
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor  = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    unfocusedPlaceholderColor = Color.LightGray
+                ),
+                modifier = Modifier
+                    .weight(1f)
+            )
+            OutlinedTextField(
+                value = textSecond,
+                onValueChange = {textSecond = it},
+                placeholder = {Text("Dog's name")},
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor  = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    unfocusedPlaceholderColor = Color.LightGray
+                ),
+                modifier = Modifier
+                    .weight(1f)
+            )
+
+
+
+        Button(onClick = {
+            names.add(text + " " + textSecond)
+        }){
+            Text("Przycisk")
+        }
     }
-}
+}}
 
 
 
