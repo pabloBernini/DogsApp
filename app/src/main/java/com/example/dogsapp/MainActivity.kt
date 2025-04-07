@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -22,11 +24,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -55,7 +56,7 @@ class MainActivity : ComponentActivity() {
 }
 
 
-
+val names = mutableStateListOf<String>("one", "two", "three")
 @Composable
 fun NavigationExample() {
     val navController = rememberNavController()
@@ -78,8 +79,9 @@ fun Screen1(navController: NavController) {
 
         Row(
             modifier = Modifier
-                .fillMaxWidth().
-                height(50.dp).background(Color.LightGray)
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(Color.LightGray)
                 .padding(10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -131,7 +133,7 @@ fun Screen1(navController: NavController) {
                 .weight(1f)
         )
         IconButton(onClick = {
-
+            names.add("ok")
         },modifier = Modifier.size(50.dp)) {
             Icon(
                 imageVector = Icons.Filled.Add,
@@ -140,9 +142,35 @@ fun Screen1(navController: NavController) {
         }
     }
 
+//////////////////////// L I S T /////////////////////////////
 
-    }
-    }
+        LazyColumn(modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp)) {
+            items(names.size) { name ->
+
+                // list item //
+
+                Text(text = names[name])
+
+                IconButton(onClick = {
+                    names.removeAt(name)
+                },modifier = Modifier.size(25.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = "add"
+                    )
+                }
+
+
+            }
+        }
+
+
+
+
+    } ///end of column
+} /// end screen1
 
 
 @Composable
@@ -154,8 +182,9 @@ fun Screen2(navController: NavController) {
     Column (modifier = Modifier.fillMaxSize()){
         Row(
             modifier = Modifier
-                .fillMaxWidth().
-                height(50.dp).background(Color.LightGray)
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(Color.LightGray)
                 .padding(10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -194,8 +223,9 @@ fun Screen3(navController: NavController) {
     Column (modifier = Modifier.fillMaxSize()){
         Row(
             modifier = Modifier
-                .fillMaxWidth().
-                height(50.dp).background(Color.LightGray)
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(Color.LightGray)
                 .padding(10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -232,8 +262,9 @@ fun Screen4(navController: NavController) {
     Column (modifier = Modifier.fillMaxSize()){
         Row(
             modifier = Modifier
-                .fillMaxWidth().
-                height(50.dp).background(Color.LightGray)
+                .fillMaxWidth()
+                .height(50.dp)
+                .background(Color.LightGray)
                 .padding(10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -258,7 +289,11 @@ fun Screen4(navController: NavController) {
                 contentDescription = "back",
                 tint = Color.Transparent
             )
-        }}
+        }
+
+    /////////////// D O G    A D D I N G /////////
+
+    }
 }
 
 
