@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -456,96 +457,88 @@ fun Screen4(navController: NavController) {
         var isLoading by remember { mutableStateOf(true) }
         var errorMessage by remember { mutableStateOf<String?>(null) }
         val coroutineScope = rememberCoroutineScope()
-
-        LaunchedEffect(Unit) {
-            coroutineScope.launch {
-                try {
-                    val response = withContext(Dispatchers.IO) {
-                        RetrofitInstance.api.getRandomDogImage()
-                    }
-                    imageUrl = response.message
-                } catch (e: Exception) {
-                    errorMessage = "Error loading image: ${e.message}"
-                } finally {
-                    isLoading = false
+Column(modifier = Modifier.fillMaxWidth(),
+    horizontalAlignment = Alignment.CenterHorizontally) {
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitInstance.api.getRandomDogImage()
                 }
+                imageUrl = response.message
+            } catch (e: Exception) {
+                errorMessage = "Error loading image: ${e.message}"
+            } finally {
+                isLoading = false
             }
         }
+    }
 
-        if (imageUrl != null) {
-            Image(
-                painter = rememberAsyncImagePainter(imageUrl),
-                contentDescription = "Random Dog Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(1f)
-                    .padding(16.dp)
-            )
-        } else if (isLoading) {
-            Text("Loading Dog Image...")
-        } else if (errorMessage != null) {
-            Text(errorMessage!!)
-        } else {
-            Text("Failed to load dog image.")
-        }
-
-
+    if (imageUrl != null) {
+        Image(
+            painter = rememberAsyncImagePainter(imageUrl),
+            contentDescription = "Random Dog Image",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .padding(0.dp, 40.dp)
+                .size(250.dp)
+                .aspectRatio(1f)
+        )
+    } else if (isLoading) {
+        CircularProgressIndicator(modifier = Modifier.size(250.dp))
+        Text("Loading Dog Image...")
+    } else if (errorMessage != null) {
+        Text(errorMessage!!)
+    } else {
+        Text("Failed to load dog image.")
+    }
 
 
     /////////////// D O G    A D D I N G /////////
 
-        var text by remember {mutableStateOf("")}
-        var textSecond by remember {mutableStateOf("")}
-        var nameExists by remember {mutableStateOf("")}
+    var text by remember { mutableStateOf("") }
+    var textSecond by remember { mutableStateOf("") }
+    var nameExists by remember { mutableStateOf("") }
 
 
-        Column(modifier = Modifier
-            .padding(10.dp)
-            .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceAround
-            ) {
-            OutlinedTextField(
-                value = text,
-                onValueChange = {text = it},
-                placeholder = {Text("Dog's name")},
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor  = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    unfocusedPlaceholderColor = Color.LightGray
-                ),
-                modifier = Modifier
-                    .weight(1f)
+
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            placeholder = { Text("Dog's name") },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                unfocusedPlaceholderColor = Color.LightGray
             )
-            OutlinedTextField(
-                value = textSecond,
-                onValueChange = {textSecond = it},
-                placeholder = {Text("Dog's breed")},
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor  = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    unfocusedPlaceholderColor = Color.LightGray
-                ),
-                modifier = Modifier
-                    .weight(1f)
+        )
+    Text(nameExists, color = Color.Red, modifier = Modifier.padding(0.dp,0.dp,0.dp,20.dp))
+        OutlinedTextField(
+            value = textSecond,
+            onValueChange = { textSecond = it },
+            placeholder = { Text("Dog's breed") },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                unfocusedPlaceholderColor = Color.LightGray
             )
+        )
 
-            Text(nameExists, color = Color.Red)
+
 
         Button(onClick = {
 
-            if(names.any { it.name.equals(text, ignoreCase = true) }) {
+            if (names.any { it.name.equals(text, ignoreCase = true) }) {
                 nameExists = "This name already exists"
 
             } else {
                 nameExists = ""
-            val newDog = Dog(text, textSecond,false, "$imageUrl")
-            names.add(newDog)
-            navController.navigate("screen1")
+                val newDog = Dog(text, textSecond, false, "$imageUrl")
+                names.add(newDog)
+                navController.navigate("screen1")
             }
 
-        }){
+        }, modifier = Modifier.padding(0.dp,40.dp)) {
             Text("Add")
         }
     }
@@ -598,7 +591,6 @@ fun Screen5(navController: NavController, name: String, breed: String, dogPictur
         }
 
         Column(modifier = Modifier.padding(50.dp).fillMaxWidth(),
-            verticalArrangement = Arrangement.SpaceAround,
             horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painter = rememberAsyncImagePainter(dogPictureUrl),
