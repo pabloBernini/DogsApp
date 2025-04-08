@@ -110,11 +110,8 @@ object RetrofitInstance {
 
 
 
-val dog1 = Dog("Boxy", "German Shepard",false)
-val dog2 = Dog("Monty", "Retriever", false)
-val dog3 = Dog("Taj", "Boxer", false)
 
-val names = mutableStateListOf<Dog>(dog1, dog2, dog3)
+val names = mutableStateListOf<Dog>()
 
 @Composable
 fun NavigationExample() {
@@ -240,14 +237,23 @@ fun Screen1(navController: NavController) {
             Row(modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
-                Image(
+               /* Image(
                     painter = painterResource(id = R.drawable.doggo1),
                     contentDescription = "Doggo Image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(50.dp).aspectRatio(1f)
-
-
+*/
+                Image(
+                    painter = rememberAsyncImagePainter(filteredList[index].dogPictureUrl),
+                    contentDescription = "Specific dog image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .aspectRatio(1f)
+                        .padding(10.dp)
                 )
+
+
                 Column(modifier = Modifier
                     .fillMaxWidth(0.75f)
                     .clickable {
@@ -441,11 +447,11 @@ fun Screen4(navController: NavController) {
 
 
         var imageUrl by remember { mutableStateOf<String?>(null) }
-        var isLoading by remember { mutableStateOf(true) } // Start loading immediately
+        var isLoading by remember { mutableStateOf(true) }
         var errorMessage by remember { mutableStateOf<String?>(null) }
         val coroutineScope = rememberCoroutineScope()
 
-        LaunchedEffect(Unit) { // Fetch image on first composition
+        LaunchedEffect(Unit) {
             coroutineScope.launch {
                 try {
                     val response = withContext(Dispatchers.IO) {
@@ -523,7 +529,7 @@ fun Screen4(navController: NavController) {
 
 
         Button(onClick = {
-            val newDog = Dog(text, textSecond,false )
+            val newDog = Dog(text, textSecond,false, "$imageUrl")
             names.add(newDog)
             navController.navigate("screen1")
 
