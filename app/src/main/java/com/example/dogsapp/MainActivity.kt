@@ -1,4 +1,5 @@
 package com.example.dogsapp
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -123,15 +124,18 @@ fun NavigationExample() {
         composable("screen3") { Screen3(navController) }
         composable("screen4") { Screen4(navController) }
         composable(
-            "screen5/{name}/{breed}",
+            "screen5/{name}/{breed}/{dogPictureUrl}",
             arguments = listOf(
                 navArgument("name") { type = NavType.StringType },
                 navArgument("breed") { type = NavType.StringType },
+                navArgument("dogPictureUrl") { type = NavType.StringType }
+
             )
         ) { backStackEntry ->
             val name = backStackEntry.arguments?.getString("name") ?: ""
             val breed = backStackEntry.arguments?.getString("breed") ?: ""
-            Screen5(navController, name, breed)
+            val dogPictureUrl = backStackEntry.arguments?.getString("dogPictureUrl") ?: ""
+            Screen5(navController, name, breed, dogPictureUrl)
         }}
     }
 
@@ -253,13 +257,14 @@ fun Screen1(navController: NavController) {
                         .padding(10.dp)
                 )
 
-
+                val encodedUrl = Uri.encode(filteredList[index].dogPictureUrl)
                 Column(modifier = Modifier
                     .fillMaxWidth(0.75f)
                     .clickable {
                         navController.navigate("screen5/" +
                                 "${filteredList[index].name}/" +
-                                filteredList[index].breed
+                                "${filteredList[index].breed}/" +
+                                encodedUrl
                         )
                     }){
 
@@ -540,7 +545,7 @@ fun Screen4(navController: NavController) {
 }}
 
 @Composable
-fun Screen5(navController: NavController, name: String, breed: String) {
+fun Screen5(navController: NavController, name: String, breed: String, dogPictureUrl: String) {
 
 
 
@@ -582,7 +587,15 @@ fun Screen5(navController: NavController, name: String, breed: String) {
         Column(modifier = Modifier.padding(50.dp).fillMaxWidth(),
             verticalArrangement = Arrangement.SpaceAround,
             horizontalAlignment = Alignment.CenterHorizontally) {
-
+            Image(
+                painter = rememberAsyncImagePainter(dogPictureUrl),
+                contentDescription = "Random Dog Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(200.dp)
+                    .aspectRatio(1f)
+                    .padding(10.dp)
+            )
             Text(name)
              Text(breed)
 
