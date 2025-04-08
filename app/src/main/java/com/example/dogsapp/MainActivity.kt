@@ -46,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -226,8 +227,8 @@ fun Screen1(navController: NavController) {
             )
         }
     }
-        Row {
-            Text("\uD83D\uDC36: ${names.size}")
+        Row(modifier = Modifier.padding(10.dp)) {
+            Text("\uD83D\uDC36: ${names.size} ")
             Text("\uD83D\uDC97: ${names.count{it.isPinned}}")
         }
 
@@ -252,9 +253,9 @@ fun Screen1(navController: NavController) {
                     contentDescription = "Specific dog image",
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(60.dp)
                         .aspectRatio(1f)
-                        .padding(10.dp)
+                        .padding(5.dp)
                 )
 
                 val encodedUrl = Uri.encode(filteredList[index].dogPictureUrl)
@@ -268,7 +269,7 @@ fun Screen1(navController: NavController) {
                         )
                     }){
 
-                Text(text = filteredList[index].name)
+                Text(text = filteredList[index].name, fontWeight = Bold)
                 Text(text = filteredList[index].breed)
                 }
 
@@ -496,8 +497,7 @@ fun Screen4(navController: NavController) {
 
         var text by remember {mutableStateOf("")}
         var textSecond by remember {mutableStateOf("")}
-
-
+        var nameExists by remember {mutableStateOf("")}
 
 
         Column(modifier = Modifier
@@ -521,7 +521,7 @@ fun Screen4(navController: NavController) {
             OutlinedTextField(
                 value = textSecond,
                 onValueChange = {textSecond = it},
-                placeholder = {Text("Dog's name")},
+                placeholder = {Text("Dog's breed")},
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor  = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -531,12 +531,19 @@ fun Screen4(navController: NavController) {
                     .weight(1f)
             )
 
-
+            Text(nameExists, color = Color.Red)
 
         Button(onClick = {
+
+            if(names.any { it.name.equals(text, ignoreCase = true) }) {
+                nameExists = "This name already exists"
+
+            } else {
+                nameExists = ""
             val newDog = Dog(text, textSecond,false, "$imageUrl")
             names.add(newDog)
             navController.navigate("screen1")
+            }
 
         }){
             Text("Add")
@@ -577,11 +584,17 @@ fun Screen5(navController: NavController, name: String, breed: String, dogPictur
             )
 
 
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "back",
-                tint = Color.Transparent
-            )
+            IconButton(
+                onClick = {
+                    names.removeIf{ it.name == name }
+                    navController.navigate("screen1")
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = "delete",
+                )
+            }
         }
 
         Column(modifier = Modifier.padding(50.dp).fillMaxWidth(),
@@ -596,7 +609,7 @@ fun Screen5(navController: NavController, name: String, breed: String, dogPictur
                     .aspectRatio(1f)
                     .padding(10.dp)
             )
-            Text(name)
+            Text(name, fontWeight = Bold)
              Text(breed)
 
         }
