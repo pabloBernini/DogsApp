@@ -71,7 +71,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    NavigationExample()
+                    Navigation()
                 }
             }
         }
@@ -117,7 +117,7 @@ object RetrofitInstance {
 val names = mutableStateListOf<Dog>()
 
 @Composable
-fun NavigationExample() {
+fun Navigation() {
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = "screen1") {
